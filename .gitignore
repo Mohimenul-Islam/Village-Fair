@@ -1,0 +1,18 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Executables
+ferris_wheel
+*.exe
+*.out
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
