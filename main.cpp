@@ -84,6 +84,51 @@ struct Star {
 const int NUM_STARS = 100;
 Star stars[NUM_STARS];
 
+// Cloud structure
+struct Cloud {
+    float x, y;
+    float speed;
+    float scale;
+};
+const int NUM_CLOUDS = 6;
+Cloud clouds[NUM_CLOUDS];
+
+// Balloon structure
+struct Balloon {
+    float x, y;
+    float vx, vy; // Velocity
+    float r, g, b; // Color
+    float scale;
+    float stringWave; // For string waving animation
+    bool active;
+};
+const int NUM_BALLOONS = 8;
+Balloon balloons[NUM_BALLOONS];
+
+// Flag structure
+struct Flag {
+    float x, y;        // Position
+    float poleHeight;  // Height of pole
+    float r, g, b;     // Flag color
+    float wavePhase;   // For waving animation
+};
+const int NUM_FLAGS = 4;
+Flag flags[NUM_FLAGS];
+float flagWaveTime = 0.0f;
+
+// String lights animation
+float stringLightPhase = 0.0f;
+
+// Tree structure
+struct Tree {
+    float x, y;
+    float scale;
+    float trunkHeight;
+    float leafRadius;
+};
+const int NUM_TREES = 8;
+Tree trees[NUM_TREES];
+
 // Initialize OpenGL
 void init() {
     glClearColor(0.53f, 0.81f, 0.92f, 1.0f);
@@ -127,6 +172,76 @@ void init() {
             case 5: people[i].r = 0.9f; people[i].g = 0.5f; people[i].b = 0.2f; break; // Orange
         }
     }
+    
+    // Initialize clouds
+    for (int i = 0; i < NUM_CLOUDS; i++) {
+        clouds[i].x = (rand() % 800) - 400.0f;
+        clouds[i].y = 100.0f + (rand() % 150); // High in the sky
+        clouds[i].speed = 0.1f + (rand() % 30) / 100.0f; // Different speeds
+        clouds[i].scale = 0.8f + (rand() % 60) / 100.0f; // Different sizes
+    }
+    
+    // Initialize balloons
+    for (int i = 0; i < NUM_BALLOONS; i++) {
+        balloons[i].x = (rand() % 700) - 350.0f;
+        balloons[i].y = -250.0f + (rand() % 500); // Spread across entire screen height
+        balloons[i].vx = ((rand() % 40) - 20) / 100.0f; // Slight horizontal drift
+        balloons[i].vy = 0.2f + (rand() % 25) / 100.0f; // Float upward faster
+        balloons[i].scale = 1.0f + (rand() % 60) / 100.0f; // Bigger scale
+        balloons[i].stringWave = (rand() % 360) * 3.14159f / 180.0f; // Random phase
+        balloons[i].active = true;
+        
+        // Vibrant balloon colors
+        int colorChoice = rand() % 8;
+        switch(colorChoice) {
+            case 0: balloons[i].r = 1.0f; balloons[i].g = 0.2f; balloons[i].b = 0.2f; break; // Red
+            case 1: balloons[i].r = 0.2f; balloons[i].g = 0.4f; balloons[i].b = 1.0f; break; // Blue
+            case 2: balloons[i].r = 0.2f; balloons[i].g = 1.0f; balloons[i].b = 0.3f; break; // Green
+            case 3: balloons[i].r = 1.0f; balloons[i].g = 0.9f; balloons[i].b = 0.2f; break; // Yellow
+            case 4: balloons[i].r = 1.0f; balloons[i].g = 0.2f; balloons[i].b = 1.0f; break; // Magenta
+            case 5: balloons[i].r = 1.0f; balloons[i].g = 0.6f; balloons[i].b = 0.1f; break; // Orange
+            case 6: balloons[i].r = 0.5f; balloons[i].g = 0.2f; balloons[i].b = 1.0f; break; // Purple
+            case 7: balloons[i].r = 0.2f; balloons[i].g = 1.0f; balloons[i].b = 0.9f; break; // Cyan
+        }
+    }
+    
+    // Initialize flags
+    flags[0].x = -350.0f; flags[0].y = -250.0f; flags[0].poleHeight = 80.0f;
+    flags[0].r = 1.0f; flags[0].g = 0.2f; flags[0].b = 0.2f; flags[0].wavePhase = 0.0f;
+    
+    flags[1].x = 350.0f; flags[1].y = -250.0f; flags[1].poleHeight = 80.0f;
+    flags[1].r = 0.2f; flags[1].g = 0.3f; flags[1].b = 1.0f; flags[1].wavePhase = 1.57f;
+    
+    flags[2].x = -150.0f; flags[2].y = 50.0f; flags[2].poleHeight = 50.0f;
+    flags[2].r = 0.2f; flags[2].g = 1.0f; flags[2].b = 0.3f; flags[2].wavePhase = 3.14f;
+    
+    flags[3].x = 150.0f; flags[3].y = 50.0f; flags[3].poleHeight = 50.0f;
+    flags[3].r = 1.0f; flags[3].g = 0.8f; flags[3].b = 0.2f; flags[3].wavePhase = 4.71f;
+    
+    // Initialize trees (background trees for depth)
+    trees[0].x = -380.0f; trees[0].y = -100.0f; trees[0].scale = 1.2f;
+    trees[0].trunkHeight = 40.0f; trees[0].leafRadius = 25.0f;
+    
+    trees[1].x = -360.0f; trees[1].y = -90.0f; trees[1].scale = 0.9f;
+    trees[1].trunkHeight = 35.0f; trees[1].leafRadius = 20.0f;
+    
+    trees[2].x = 380.0f; trees[2].y = -100.0f; trees[2].scale = 1.1f;
+    trees[2].trunkHeight = 38.0f; trees[2].leafRadius = 23.0f;
+    
+    trees[3].x = 360.0f; trees[3].y = -95.0f; trees[3].scale = 1.0f;
+    trees[3].trunkHeight = 36.0f; trees[3].leafRadius = 22.0f;
+    
+    trees[4].x = -320.0f; trees[4].y = -85.0f; trees[4].scale = 0.7f;
+    trees[4].trunkHeight = 30.0f; trees[4].leafRadius = 18.0f;
+    
+    trees[5].x = 320.0f; trees[5].y = -88.0f; trees[5].scale = 0.8f;
+    trees[5].trunkHeight = 32.0f; trees[5].leafRadius = 19.0f;
+    
+    trees[6].x = -390.0f; trees[6].y = -110.0f; trees[6].scale = 1.4f;
+    trees[6].trunkHeight = 45.0f; trees[6].leafRadius = 28.0f;
+    
+    trees[7].x = 390.0f; trees[7].y = -108.0f; trees[7].scale = 1.3f;
+    trees[7].trunkHeight = 42.0f; trees[7].leafRadius = 26.0f;
 }
 
 // Draw a circle
@@ -197,6 +312,108 @@ void drawMoon() {
         drawFilledCircle(moonX + 5, moonY - 8, 5, 20);
         drawFilledCircle(moonX + 8, moonY + 8, 4, 20);
         glDisable(GL_BLEND);
+    }
+}
+
+// Draw a single cloud
+void drawCloud(float x, float y, float scale) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Cloud color - white with slight transparency, dims at night
+    float brightness = 1.0f - timeOfDay * 0.4f;
+    float alpha = 0.85f * (1.0f - timeOfDay * 0.6f); // Fade at night
+    glColor4f(brightness, brightness, brightness, alpha);
+    
+    // Draw cloud using multiple circles
+    glPushMatrix();
+    glTranslatef(x, y, 0);
+    glScalef(scale, scale, 1.0f);
+    
+    // Main cloud body (3 large puffs)
+    drawFilledCircle(-15, 0, 12, 20);
+    drawFilledCircle(0, 5, 15, 20);
+    drawFilledCircle(15, 0, 12, 20);
+    
+    // Bottom puffs for volume
+    drawFilledCircle(-8, -5, 10, 20);
+    drawFilledCircle(8, -5, 10, 20);
+    
+    // Top accent puffs
+    drawFilledCircle(-5, 8, 8, 20);
+    drawFilledCircle(5, 8, 7, 20);
+    
+    glPopMatrix();
+    glDisable(GL_BLEND);
+}
+
+// Draw all clouds
+void drawClouds() {
+    // Only show clouds during daytime (fade out at dusk/night)
+    if (timeOfDay < 0.7f) {
+        for (int i = 0; i < NUM_CLOUDS; i++) {
+            drawCloud(clouds[i].x, clouds[i].y, clouds[i].scale);
+        }
+    }
+}
+
+// Draw a single balloon
+void drawBalloon(float x, float y, float scale, float r, float g, float b, float stringWave) {
+    float brightness = 1.0f - timeOfDay * 0.5f; // Dim at night
+    
+    glPushMatrix();
+    glTranslatef(x, y, 0);
+    glScalef(scale, scale, 1.0f);
+    
+    // Balloon body (oval shape)
+    glColor3f(r * brightness, g * brightness, b * brightness);
+    drawFilledCircle(0, 0, 10, 20);
+    
+    // Slightly elongated for balloon shape
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(0, 0);
+    for (int i = 0; i <= 20; i++) {
+        float angle = 3.14159f * i / 20.0f; // Only top half
+        float bx = 10 * cos(angle);
+        float by = 12 * sin(angle); // Taller
+        glVertex2f(bx, by);
+    }
+    glEnd();
+    
+    // Balloon shine/highlight
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1.0f, 1.0f, 1.0f, 0.4f);
+    drawFilledCircle(-3, 5, 3, 12);
+    glDisable(GL_BLEND);
+    
+    // Balloon knot at bottom
+    glColor3f(r * 0.7f * brightness, g * 0.7f * brightness, b * 0.7f * brightness);
+    drawFilledCircle(0, -11, 2, 12);
+    
+    // String (waving in the wind)
+    glColor3f(0.3f * brightness, 0.3f * brightness, 0.3f * brightness);
+    glLineWidth(1.5f);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= 10; i++) {
+        float sy = -11 - i * 4; // String length
+        float sx = 2 * sin(stringWave + i * 0.5f); // Wave effect
+        glVertex2f(sx, sy);
+    }
+    glEnd();
+    glLineWidth(1.0f);
+    
+    glPopMatrix();
+}
+
+// Draw all balloons
+void drawBalloons() {
+    for (int i = 0; i < NUM_BALLOONS; i++) {
+        if (balloons[i].active) {
+            drawBalloon(balloons[i].x, balloons[i].y, balloons[i].scale,
+                       balloons[i].r, balloons[i].g, balloons[i].b,
+                       balloons[i].stringWave);
+        }
     }
 }
 
@@ -432,6 +649,268 @@ void drawFireworks() {
     }
     
     glDisable(GL_BLEND);
+}
+
+// Draw a single flag with waving animation
+void drawFlag(float x, float y, float poleHeight, float r, float g, float b, float wavePhase) {
+    float brightness = 1.0f - timeOfDay * 0.5f;
+    
+    glPushMatrix();
+    glTranslatef(x, y, 0);
+    
+    // Pole
+    glColor3f(0.5f * brightness, 0.4f * brightness, 0.3f * brightness);
+    glLineWidth(4.0f);
+    glBegin(GL_LINES);
+    glVertex2f(0, 0);
+    glVertex2f(0, poleHeight);
+    glEnd();
+    
+    // Pole top ball
+    glColor3f(0.9f * brightness, 0.8f * brightness, 0.3f * brightness);
+    drawFilledCircle(0, poleHeight, 3, 12);
+    
+    // Flag - waving with sine wave
+    float flagWidth = 30.0f;
+    float flagHeight = 20.0f;
+    float flagY = poleHeight - flagHeight - 5;
+    
+    glColor3f(r * brightness, g * brightness, b * brightness);
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= 10; i++) {
+        float t = i / 10.0f;
+        float wave = sin((flagWaveTime + wavePhase) * 2.0f + t * 6.28f) * 3.0f;
+        float x1 = t * flagWidth + wave;
+        float y1 = flagY;
+        float y2 = flagY + flagHeight;
+        
+        glVertex2f(x1, y1);
+        glVertex2f(x1, y2);
+    }
+    glEnd();
+    
+    // Flag border for visibility
+    glColor3f(brightness * 0.2f, brightness * 0.2f, brightness * 0.2f);
+    glLineWidth(1.5f);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= 10; i++) {
+        float t = i / 10.0f;
+        float wave = sin((flagWaveTime + wavePhase) * 2.0f + t * 6.28f) * 3.0f;
+        float x1 = t * flagWidth + wave;
+        glVertex2f(x1, flagY);
+    }
+    glEnd();
+    
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= 10; i++) {
+        float t = i / 10.0f;
+        float wave = sin((flagWaveTime + wavePhase) * 2.0f + t * 6.28f) * 3.0f;
+        float x1 = t * flagWidth + wave;
+        glVertex2f(x1, flagY + flagHeight);
+    }
+    glEnd();
+    
+    glPopMatrix();
+}
+
+// Draw all flags
+void drawFlags() {
+    for (int i = 0; i < NUM_FLAGS; i++) {
+        drawFlag(flags[i].x, flags[i].y, flags[i].poleHeight, 
+                flags[i].r, flags[i].g, flags[i].b, flags[i].wavePhase);
+    }
+}
+
+// Draw food/game stalls
+void drawFoodStalls() {
+    float brightness = 1.0f - timeOfDay * 0.5f;
+    
+    // Stall 1 - Balloon Game (left side)
+    glPushMatrix();
+    glTranslatef(-280, -80, 0);
+    
+    // Stall structure
+    glColor3f(0.8f * brightness, 0.6f * brightness, 0.4f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-40, -50);
+    glVertex2f(40, -50);
+    glVertex2f(40, 10);
+    glVertex2f(-40, 10);
+    glEnd();
+    
+    // Striped awning
+    for (int i = 0; i < 8; i++) {
+        if (i % 2 == 0) {
+            glColor3f(1.0f * brightness, 0.3f * brightness, 0.3f * brightness);
+        } else {
+            glColor3f(1.0f * brightness, 1.0f * brightness, 1.0f * brightness);
+        }
+        glBegin(GL_POLYGON);
+        glVertex2f(-40 + i * 10, 10);
+        glVertex2f(-30 + i * 10, 10);
+        glVertex2f(-28 + i * 10, 25);
+        glVertex2f(-42 + i * 10, 25);
+        glEnd();
+    }
+    
+    // Sign
+    glColor3f(1.0f * brightness, 0.9f * brightness, 0.3f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-30, 15);
+    glVertex2f(30, 15);
+    glVertex2f(30, 22);
+    glVertex2f(-30, 22);
+    glEnd();
+    
+    // Counter
+    glColor3f(0.6f * brightness, 0.4f * brightness, 0.3f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-40, -10);
+    glVertex2f(40, -10);
+    glVertex2f(40, -5);
+    glVertex2f(-40, -5);
+    glEnd();
+    
+    // Balloons on display (small)
+    float colors[5][3] = {
+        {1.0f, 0.2f, 0.2f}, {0.2f, 0.4f, 1.0f}, {0.2f, 1.0f, 0.3f},
+        {1.0f, 0.9f, 0.2f}, {1.0f, 0.2f, 1.0f}
+    };
+    for (int i = 0; i < 5; i++) {
+        glColor3f(colors[i][0] * brightness, colors[i][1] * brightness, colors[i][2] * brightness);
+        drawFilledCircle(-25 + i * 12, 0, 5, 12);
+    }
+    
+    glPopMatrix();
+    
+    // Stall 2 - Popcorn/Candy (right side)
+    glPushMatrix();
+    glTranslatef(280, -80, 0);
+    
+    // Stall structure
+    glColor3f(0.7f * brightness, 0.5f * brightness, 0.6f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-40, -50);
+    glVertex2f(40, -50);
+    glVertex2f(40, 10);
+    glVertex2f(-40, 10);
+    glEnd();
+    
+    // Striped awning
+    for (int i = 0; i < 8; i++) {
+        if (i % 2 == 0) {
+            glColor3f(0.2f * brightness, 0.6f * brightness, 1.0f * brightness);
+        } else {
+            glColor3f(1.0f * brightness, 1.0f * brightness, 1.0f * brightness);
+        }
+        glBegin(GL_POLYGON);
+        glVertex2f(-40 + i * 10, 10);
+        glVertex2f(-30 + i * 10, 10);
+        glVertex2f(-28 + i * 10, 25);
+        glVertex2f(-42 + i * 10, 25);
+        glEnd();
+    }
+    
+    // Sign
+    glColor3f(1.0f * brightness, 0.9f * brightness, 0.3f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-30, 15);
+    glVertex2f(30, 15);
+    glVertex2f(30, 22);
+    glVertex2f(-30, 22);
+    glEnd();
+    
+    // Counter
+    glColor3f(0.6f * brightness, 0.4f * brightness, 0.3f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-40, -10);
+    glVertex2f(40, -10);
+    glVertex2f(40, -5);
+    glVertex2f(-40, -5);
+    glEnd();
+    
+    // Popcorn boxes
+    glColor3f(1.0f * brightness, 0.3f * brightness, 0.2f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-20, -5);
+    glVertex2f(-10, -5);
+    glVertex2f(-8, 5);
+    glVertex2f(-22, 5);
+    glEnd();
+    
+    glColor3f(1.0f * brightness, 1.0f * brightness, 0.3f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-5, -5);
+    glVertex2f(5, -5);
+    glVertex2f(7, 5);
+    glVertex2f(-7, 5);
+    glEnd();
+    
+    glColor3f(1.0f * brightness, 0.3f * brightness, 0.2f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(10, -5);
+    glVertex2f(20, -5);
+    glVertex2f(22, 5);
+    glVertex2f(8, 5);
+    glEnd();
+    
+    // Popcorn tops (fluffy)
+    glColor3f(1.0f * brightness, 1.0f * brightness, 0.9f * brightness);
+    drawFilledCircle(-15, 5, 4, 12);
+    drawFilledCircle(-12, 7, 3, 12);
+    drawFilledCircle(0, 5, 4, 12);
+    drawFilledCircle(2, 7, 3, 12);
+    drawFilledCircle(15, 5, 4, 12);
+    drawFilledCircle(17, 7, 3, 12);
+    
+    glPopMatrix();
+    
+    // Stall 3 - Ring Toss Game (near carousel)
+    glPushMatrix();
+    glTranslatef(-220, 80, 0);
+    
+    // Small stall structure
+    glColor3f(0.9f * brightness, 0.7f * brightness, 0.4f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-25, -30);
+    glVertex2f(25, -30);
+    glVertex2f(25, 5);
+    glVertex2f(-25, 5);
+    glEnd();
+    
+    // Awning
+    glColor3f(0.3f * brightness, 0.8f * brightness, 0.3f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-25, 5);
+    glVertex2f(25, 5);
+    glVertex2f(23, 15);
+    glVertex2f(-23, 15);
+    glEnd();
+    
+    // Bottles for ring toss
+    glColor3f(0.3f * brightness, 0.6f * brightness, 1.0f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-15, -15);
+    glVertex2f(-10, -15);
+    glVertex2f(-10, -5);
+    glVertex2f(-15, -5);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+    glVertex2f(-3, -15);
+    glVertex2f(3, -15);
+    glVertex2f(3, -5);
+    glVertex2f(-3, -5);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+    glVertex2f(10, -15);
+    glVertex2f(15, -15);
+    glVertex2f(15, -5);
+    glVertex2f(10, -5);
+    glEnd();
+    
+    glPopMatrix();
 }
 
 // Draw Ferris Wheel
@@ -1141,11 +1620,137 @@ void drawPeople() {
     }
 }
 
-// Draw ground
+// Draw a single tree
+void drawTree(float x, float y, float scale, float trunkHeight, float leafRadius) {
+    float brightness = 1.0f - timeOfDay * 0.6f;
+    
+    glPushMatrix();
+    glTranslatef(x, y, 0);
+    glScalef(scale, scale, 1.0f);
+    
+    // Tree trunk
+    glColor3f(0.4f * brightness, 0.25f * brightness, 0.1f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-5, 0);
+    glVertex2f(5, 0);
+    glVertex2f(4, trunkHeight);
+    glVertex2f(-4, trunkHeight);
+    glEnd();
+    
+    // Tree foliage (layered circles for depth)
+    float leafG = 0.5f; // Base green value
+    glColor3f(0.15f * brightness, leafG * brightness, 0.15f * brightness);
+    drawFilledCircle(0, trunkHeight + leafRadius * 0.6f, leafRadius, 20);
+    
+    glColor3f(0.2f * brightness, (leafG + 0.1f) * brightness, 0.2f * brightness);
+    drawFilledCircle(-leafRadius * 0.5f, trunkHeight + leafRadius * 0.3f, leafRadius * 0.7f, 18);
+    drawFilledCircle(leafRadius * 0.5f, trunkHeight + leafRadius * 0.3f, leafRadius * 0.7f, 18);
+    
+    glColor3f(0.1f * brightness, (leafG - 0.05f) * brightness, 0.1f * brightness);
+    drawFilledCircle(0, trunkHeight + leafRadius * 0.9f, leafRadius * 0.6f, 16);
+    
+    glPopMatrix();
+}
+
+// Draw all trees
+void drawTrees() {
+    for (int i = 0; i < NUM_TREES; i++) {
+        drawTree(trees[i].x, trees[i].y, trees[i].scale, 
+                trees[i].trunkHeight, trees[i].leafRadius);
+    }
+}
+
+// Draw string lights between two points with sag
+void drawStringLights(float x1, float y1, float x2, float y2, int numBulbs, float sagAmount) {
+    if (timeOfDay < 0.2f) return; // Only visible at dusk/night
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    
+    float colors[6][3] = {
+        {1.0f, 0.9f, 0.3f},  // Warm yellow
+        {1.0f, 0.5f, 0.2f},  // Orange
+        {1.0f, 0.3f, 0.3f},  // Red
+        {0.3f, 1.0f, 0.5f},  // Green
+        {0.3f, 0.5f, 1.0f},  // Blue
+        {1.0f, 0.3f, 1.0f}   // Pink
+    };
+    
+    // Draw the wire/string
+    glColor4f(0.2f, 0.2f, 0.2f, timeOfDay * 0.8f);
+    glLineWidth(1.5f);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= 20; i++) {
+        float t = i / 20.0f;
+        float x = x1 + (x2 - x1) * t;
+        float sag = sagAmount * sin(t * 3.14159f); // Parabolic sag
+        float y = y1 + (y2 - y1) * t - sag;
+        glVertex2f(x, y);
+    }
+    glEnd();
+    
+    // Draw the bulbs
+    for (int i = 0; i < numBulbs; i++) {
+        float t = (i + 0.5f) / numBulbs;
+        float x = x1 + (x2 - x1) * t;
+        float sag = sagAmount * sin(t * 3.14159f);
+        float y = y1 + (y2 - y1) * t - sag;
+        
+        int colorIdx = i % 6;
+        float twinkle = 0.7f + 0.3f * sin(stringLightPhase * 3.0f + i * 1.5f);
+        
+        // Glow
+        glColor4f(colors[colorIdx][0], colors[colorIdx][1], colors[colorIdx][2], 
+                  timeOfDay * 0.4f * twinkle);
+        drawFilledCircle(x, y, 6, 12);
+        
+        // Bulb core
+        glColor4f(colors[colorIdx][0], colors[colorIdx][1], colors[colorIdx][2], 
+                  timeOfDay * 0.9f * twinkle);
+        drawFilledCircle(x, y, 3, 10);
+        
+        // Bright center
+        glColor4f(1.0f, 1.0f, 1.0f, timeOfDay * 0.6f * twinkle);
+        drawFilledCircle(x, y, 1.5f, 8);
+    }
+    
+    glDisable(GL_BLEND);
+    glLineWidth(1.0f);
+}
+
+// Draw all string lights in the scene
+void drawAllStringLights() {
+    // String lights across entrance
+    drawStringLights(-120, -180, 120, -180, 12, 15);
+    
+    // String lights from entrance to left stall
+    drawStringLights(-120, -180, -300, -20, 10, 25);
+    
+    // String lights from entrance to right stall  
+    drawStringLights(120, -180, 300, -20, 10, 25);
+    
+    // String lights across the top (between flag poles area)
+    drawStringLights(-350, -170, -150, -100, 8, 20);
+    drawStringLights(150, -100, 350, -170, 8, 20);
+    
+    // String lights near ferris wheel
+    drawStringLights(-100, 0, 100, 0, 10, 12);
+    
+    // String lights around carousel area
+    drawStringLights(-260, -35, -140, -35, 6, 10);
+    
+    // String lights around swing area
+    drawStringLights(140, -10, 260, -10, 6, 10);
+}
+
+// Draw ground with pathways and texture
 void drawGround() {
-    float grassR = 0.2f * (1.0f - timeOfDay * 0.7f);
-    float grassG = 0.6f * (1.0f - timeOfDay * 0.7f);
-    float grassB = 0.2f * (1.0f - timeOfDay * 0.5f);
+    float brightness = 1.0f - timeOfDay * 0.7f;
+    
+    // Main grass area
+    float grassR = 0.2f * brightness;
+    float grassG = 0.55f * brightness;
+    float grassB = 0.2f * brightness;
     glColor3f(grassR, grassG, grassB);
     glBegin(GL_POLYGON);
     glVertex2f(-400, -300);
@@ -1153,6 +1758,85 @@ void drawGround() {
     glVertex2f(400, -100);
     glVertex2f(-400, -100);
     glEnd();
+    
+    // Darker grass patches for texture
+    glColor3f(grassR * 0.85f, grassG * 0.9f, grassB * 0.85f);
+    for (int i = 0; i < 15; i++) {
+        float px = -350 + (i % 5) * 150;
+        float py = -270 + (i / 5) * 50;
+        drawFilledCircle(px, py, 12, 12);
+    }
+    
+    // Main pathway (dirt path from entrance to center)
+    glColor3f(0.55f * brightness, 0.4f * brightness, 0.25f * brightness);
+    glBegin(GL_POLYGON);
+    glVertex2f(-50, -300);
+    glVertex2f(50, -300);
+    glVertex2f(60, -250);
+    glVertex2f(-60, -250);
+    glEnd();
+    
+    // Path continues and widens
+    glBegin(GL_POLYGON);
+    glVertex2f(-60, -250);
+    glVertex2f(60, -250);
+    glVertex2f(80, -180);
+    glVertex2f(-80, -180);
+    glEnd();
+    
+    // Circular area in front of entrance
+    glColor3f(0.5f * brightness, 0.38f * brightness, 0.22f * brightness);
+    drawFilledCircle(0, -200, 60, 24);
+    
+    // Path edges (slightly darker for definition)
+    glColor3f(0.4f * brightness, 0.3f * brightness, 0.18f * brightness);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_STRIP);
+    glVertex2f(-50, -300);
+    glVertex2f(-60, -250);
+    glVertex2f(-80, -180);
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+    glVertex2f(50, -300);
+    glVertex2f(60, -250);
+    glVertex2f(80, -180);
+    glEnd();
+    glLineWidth(1.0f);
+    
+    // Side paths to rides
+    glColor3f(0.52f * brightness, 0.38f * brightness, 0.23f * brightness);
+    
+    // Path to left (carousel)
+    glBegin(GL_POLYGON);
+    glVertex2f(-80, -180);
+    glVertex2f(-60, -180);
+    glVertex2f(-180, -120);
+    glVertex2f(-200, -120);
+    glEnd();
+    
+    // Path to right (swing ride)
+    glBegin(GL_POLYGON);
+    glVertex2f(60, -180);
+    glVertex2f(80, -180);
+    glVertex2f(180, -120);
+    glVertex2f(200, -120);
+    glEnd();
+    
+    // Path to ferris wheel (center)
+    glBegin(GL_POLYGON);
+    glVertex2f(-40, -180);
+    glVertex2f(40, -180);
+    glVertex2f(30, -100);
+    glVertex2f(-30, -100);
+    glEnd();
+    
+    // Small decorative stones/pebbles on path
+    glColor3f(0.45f * brightness, 0.4f * brightness, 0.35f * brightness);
+    for (int i = 0; i < 20; i++) {
+        float sx = -30 + (i % 10) * 6;
+        float sy = -280 + (i / 10) * 40;
+        drawFilledCircle(sx, sy, 2, 8);
+    }
 }
 
 // Draw stalls
@@ -1216,19 +1900,25 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     
     drawStars();
+    drawClouds();             // Animated clouds
     drawSun();
     drawMoon();
     drawFireworks();
     drawGround();
-    drawEntranceGate();      // NEW: Entrance gate
-    drawEntranceSign();       // NEW: Sign with blinking lights
-    drawPeople();             // NEW: Animated crowd
+    drawTrees();              // Background trees
+    drawFlags();              // Waving flags
+    drawEntranceGate();       // Entrance gate
+    drawEntranceSign();       // Sign with blinking lights
+    drawBalloons();           // Floating balloons
+    drawPeople();             // Animated crowd
     drawStalls();
+    drawFoodStalls();         // Food/game stalls
     drawFoodCart();
     drawCarousel();
     drawSwingRide();
     drawSupport();
     drawFerrisWheel();
+    drawAllStringLights();    // Fairy lights (on top so they glow)
     
     glutSwapBuffers();
 }
@@ -1254,6 +1944,14 @@ void timer(int value) {
     if (sellerArmAngle >= 45.0f || sellerArmAngle <= -10.0f) {
         sellerArmDirection = -sellerArmDirection;
     }
+    
+    // Update flag waving animation
+    flagWaveTime += 0.05f;
+    if (flagWaveTime > 6.28f) flagWaveTime -= 6.28f;
+    
+    // Update string lights twinkling
+    stringLightPhase += 0.03f;
+    if (stringLightPhase > 6.28f) stringLightPhase -= 6.28f;
     
     fireworkTimer++;
     float fireworkFrequency = (timeOfDay > 0.5f) ? 80.0f : 200.0f;
@@ -1285,6 +1983,41 @@ void timer(int value) {
                 people[i].x = -400.0f;
             } else if (people[i].x < -400.0f) {
                 people[i].x = 400.0f;
+            }
+        }
+    }
+    
+    // Update clouds - drift slowly across the sky
+    for (int i = 0; i < NUM_CLOUDS; i++) {
+        clouds[i].x += clouds[i].speed;
+        
+        // Wrap around screen - when cloud goes off right, bring back on left
+        if (clouds[i].x > 450.0f) {
+            clouds[i].x = -450.0f;
+            clouds[i].y = 100.0f + (rand() % 150); // Random new height
+        }
+    }
+    
+    // Update balloons - float upward and drift
+    for (int i = 0; i < NUM_BALLOONS; i++) {
+        if (balloons[i].active) {
+            balloons[i].x += balloons[i].vx;
+            balloons[i].y += balloons[i].vy;
+            balloons[i].stringWave += 0.08f; // Wave the string
+            
+            // Reset balloon if it floats off the top of screen
+            if (balloons[i].y > 350.0f) {
+                balloons[i].x = (rand() % 700) - 350.0f;
+                balloons[i].y = -280.0f; // Start from bottom
+                balloons[i].vx = ((rand() % 40) - 20) / 100.0f;
+                balloons[i].vy = 0.2f + (rand() % 25) / 100.0f;
+            }
+            
+            // Wrap horizontally if balloon drifts too far
+            if (balloons[i].x > 450.0f) {
+                balloons[i].x = -450.0f;
+            } else if (balloons[i].x < -450.0f) {
+                balloons[i].x = 450.0f;
             }
         }
     }

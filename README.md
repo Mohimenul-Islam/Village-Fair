@@ -11,19 +11,27 @@ A complete animated village fair scene featuring a Ferris wheel, carousel, swing
 - 🎠 **Carousel** - 6 animated horses with up/down motion and platform lights
 - 🎢 **Swing Ride** - Pendulum physics with realistic motion
 - 🍔 **Food Cart** - Animated vendor with waving arm
+- 🎪 **Food & Game Stalls** - 3 additional stalls (Balloon Game, Popcorn, Ring Toss)
 
-### 🌅 Environment
+### 🌅 Environment & Atmosphere
 - 🌞 **Day/Night Cycle** - Automatic smooth transition between day and night
 - ☀️ **Sun** - Moving across the sky during daytime
 - 🌙 **Moon** - Visible at night with crater details
 - ⭐ **Twinkling Stars** - 100 stars that appear and twinkle at night
+- ☁️ **Animated Clouds** - 6 clouds drifting across the sky
+- 🌳 **Trees** - 8 trees on both edges providing depth and framing
+- 🛤️ **Pathways** - Detailed dirt paths connecting all attractions
+- 🌱 **Textured Ground** - Grass patches and decorative elements
 - 💡 **Dynamic Lighting** - All rides light up automatically at night
+- 💡 **String Lights** - 8 strings of twinkling fairy lights throughout the fair
 
 ### 🎪 Interactive Elements
 - 🎆 **Fireworks** - Particle system with colorful explosions (Press F)
 - 🎪 **Entrance Gate** - Decorated archway entrance
 - 🪧 **Village Fair Sign** - Illuminated sign with blinking multicolor lights
 - 👥 **Walking Crowd** - 8 animated people strolling around the fair
+- 🎈 **Floating Balloons** - 8 colorful balloons drifting across the scene
+- 🚩 **Waving Flags** - 4 flags with realistic wave animation
 
 ## 🎮 Controls
 
