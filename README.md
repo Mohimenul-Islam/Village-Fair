@@ -208,7 +208,8 @@ This is an educational project for computer graphics coursework.
 
 ## 👨‍💻 Author
 
-Created with GitHub Copilot for Computer Graphics course project.
+**Mohimenul Islam**  
+Computer Graphics Course Project
 
 ---
 
